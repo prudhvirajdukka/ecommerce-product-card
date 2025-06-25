@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
+  color: #2d2d2d;
+}
+
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 70px;
+}
+
+.modal-backdrop.show {
+  opacity: 0.6;
+}
