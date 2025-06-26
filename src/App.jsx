@@ -6,20 +6,28 @@ import CartModal from "./components/CartModal";
 const App = () => {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
-  const [category, setCategory] = useState("all");
   const [cart, setCart] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const fetchProducts = async () => {
     const res = await fetch("https://dummyjson.com/products?limit=100");
     const data = await res.json();
-    setProducts(data.products);
-    setFiltered(data.products);
+    const productsWithStock = data.products.map(p => ({
+      ...p,
+      stock: 5
+    }));
+    setProducts(productsWithStock);
+    setFiltered(productsWithStock);
   };
+
   const handleCategoryChange = (cat) => {
-    setCategory(cat);
     if (cat === "all") {
       setFiltered(products);
+    } else if (cat === "watches") {
+      const filteredItems = products.filter(p =>
+        p.category.includes("watches")
+      );
+      setFiltered(filteredItems);
     } else {
       const matches = products.filter(p =>
         p.category.toLowerCase().includes(cat.toLowerCase())
@@ -27,9 +35,22 @@ const App = () => {
       setFiltered(matches);
     }
   };
+
   const handleAddToCart = (product) => {
+    const existingCount = cart.filter(item => item.id === product.id).length;
+    if (existingCount >= 5) return; // Simulated limit
+
     setCart(prev => [...prev, product]);
+
+    setFiltered(prevFiltered =>
+      prevFiltered.map(p =>
+        p.id === product.id && existingCount + 1 >= 5
+          ? { ...p, stock: 0 }
+          : p
+      )
+    );
   };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -41,6 +62,7 @@ const App = () => {
         cartCount={cart.length}
         openCart={() => setShowModal(true)}
       />
+
       <main className="container py-4 d-flex flex-wrap justify-content-center gap-4">
         {filtered.map(product => (
           <ProductCard
@@ -50,6 +72,7 @@ const App = () => {
           />
         ))}
       </main>
+
       {showModal && (
         <CartModal cartItems={cart} onClose={() => setShowModal(false)} />
       )}
